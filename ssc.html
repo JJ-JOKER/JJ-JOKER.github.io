@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>心动问答录</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Microsoft Yahei", sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            position: relative;
+        }
+
+        .wrap {
+            width: 100%;
+            max-width: 700px;
+            background: #fff;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+            padding: 35px;
+        }
+
+        .title {
+            text-align: center;
+            font-size: 26px;
+            color: #333;
+            margin-bottom: 25px;
+        }
+
+        .info-bar {
+            display: flex;
+            justify-content: space-between;
+            background: #f5f9ff;
+            padding: 12px 18px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            color: #555;
+        }
+
+        .chance-dot {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #28c76f;
+            margin: 0 2px;
+        }
+
+        .chance-dot.gray {
+            background: #ddd;
+        }
+
+        .question-box {
+            background: #f8fbff;
+            border-radius: 16px;
+            padding: 25px;
+            margin-bottom: 20px;
+        }
+
+        .question {
+            font-size: 18px;
+            color: #222;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .option {
+            display: block;
+            width: 100%;
+            padding: 12px 15px;
+            margin: 10px 0;
+            border: 1px solid #dbe3f0;
+            border-radius: 10px;
+            background: #fff;
+            text-align: left;
+            font-size: 16px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .option:hover {
+            border-color: #4facfe;
+            background: #f0f7ff;
+        }
+
+        .option.active {
+            background: #4facfe;
+            color: #fff;
+            border-color: #4facfe;
+        }
+
+        .tip {
+            height: 24px;
+            line-height: 24px;
+            font-size: 15px;
+            margin: 10px 0;
+        }
+
+        .error { color: #f56c6c; }
+
+        /* 完成页面：粉色背景 */
+        .finish-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #f8bbd0 0%, #f48fb1 50%, #f06292 100%);
+            display: none;
+            z-index: 9999;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            animation: fadeIn 0.8s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .finish-img {
+            max-width: 90%;
+            max-height: 65vh;
+            object-fit: contain;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            animation: scaleIn 0.6s ease;
+        }
+
+        @keyframes scaleIn {
+            from { transform: scale(0.9); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        /* 可爱圆润字体 + 蛋糕图标 */
+        .finish-text-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin-top: 30px;
+            background: rgba(255, 255, 255, 0.85);
+            padding: 12px 28px;
+            border-radius: 50px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            animation: slideUp 0.8s ease;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .finish-text {
+            color: #c2185b;
+            font-size: 22px;
+            text-align: center;
+            letter-spacing: 2px;
+            font-family: "Dancing Script", "华康手札体W7P", "华康翩翩体", "Segoe UI", "微软雅黑", cursive;
+            font-weight: 600;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+
+        .cake-icon {
+            font-size: 32px;
+            display: inline-block;
+            animation: bounce 0.6s ease infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+    </style>
+</head>
+<body>
+    <div class="wrap">
+        <h2 class="title">心动问答录</h2>
+        <div class="info-bar">
+            <span>题目 <span id="qNum">1</span> / 10</span>
+            <span>剩余机会：<span id="chanceBox"></span></span>
+        </div>
+
+        <div class="question-box">
+            <div class="question" id="questionText"></div>
+            <div id="optionsBox"></div>
+        </div>
+
+        <div class="tip" id="tipText"></div>
+    </div>
+
+    <!-- 完成页：轮播图片 + 粉色背景 + 蛋糕祝福 -->
+    <div class="finish-bg" id="finishBg">
+        <img src="./pic1.png" class="finish-img" id="slideImg">
+        <div class="finish-text-wrapper">
+            <span class="cake-icon">🎂</span>
+            <span class="finish-text">小滕生日快乐 希望小滕永远明媚纯真</span>
+            <span class="cake-icon">🎂</span>
+        </div>
+    </div>
+
+    <!-- 背景音乐 -->
+    <audio id="bgMusic" src="./Perfect.mp3" preload="auto"></audio>
+
+    <script>
+        const questionList = [
+            { q: "小张最喜欢的是", opt: ["A. 小滕", "B. 看电影", "C. 吃饭", "D. 额。。"], ans: "A" },
+            { q: "和小张第一次见面日期", opt: ["A. 11.16", "B. 11.17", "C. 11.23", "D. 我知道但我忘了"], ans: "C" },
+            { q: "小张最喜欢的作家", opt: ["A. 埃勒里奎因", "B. 阿加莎克里斯蒂", "C. 东野圭吾", "D. 余华"], ans: "B" },
+            { q: "小张吃火锅必点的菜", opt: ["A. 鱼豆腐", "B. 千张", "C. 肉肉肉 全都是肉", "D. 青菜"], ans: "B" },
+            { q: "预测周末小张独处会做什么", opt: ["A. 看电影", "B. 打游戏", "C. 刷B站", "D. 我全都要"], ans: "D" },
+            { q: "以下哪些事是小张经常提起但是没有付诸行动的", opt: ["A. 炸掉医院", "B. 旅游", "C. 小张行动力太强", "D. 吃火锅"], ans: "A" },
+            { q: "小张最不喜欢的季节", opt: ["A. 春天", "B. 夏天", "C. 秋天", "D. 冬天"], ans: "B" },
+            { q: "小张有什么忌口", opt: ["A. 香菜", "B. 内脏", "C. 甜食", "D. 饭菜参杂水果"], ans: "D" },
+            { q: "小张更喜欢二人世界还是多人聚会", opt: ["A. 多人聚会", "B. 二人世界", "C. 都喜欢", "D. 都不喜欢"], ans: "B" },
+            { q: "小张做的视频用的配乐是", opt: ["A. A Thousand Years", "B. Perfect", "C. How Long Will I Love You", "D. 英语不好就选这个了"], ans: "A" }
+        ];
+
+        let current = 0;
+        let chance = 3;
+        let hasAnswered = false;
+
+        const qNum = document.getElementById("qNum");
+        const chanceBox = document.getElementById("chanceBox");
+        const questionText = document.getElementById("questionText");
+        const optionsBox = document.getElementById("optionsBox");
+        const tipText = document.getElementById("tipText");
+        const finishBg = document.getElementById("finishBg");
+        const bgMusic = document.getElementById("bgMusic");
+        const slideImg = document.getElementById("slideImg");
+        
+        let currentImg = 1;
+        const totalImg = 18;
+
+        // 图片轮播 5秒一张循环
+        function startSlideShow() {
+            slideImg.src = `./pic${currentImg}.png`;
+            currentImg++;
+            if (currentImg > totalImg) currentImg = 1;
+            setTimeout(startSlideShow, 5000);
+        }
+
+        function renderChance() {
+            let html = "";
+            for (let i = 0; i < 3; i++) {
+                html += `<span class="chance-dot ${i >= chance ? 'gray' : ''}"></span>`;
+            }
+            chanceBox.innerHTML = html;
+        }
+
+        function renderQuestion() {
+            const item = questionList[current];
+            qNum.innerText = current + 1;
+            questionText.innerText = item.q;
+            tipText.innerText = "";
+            hasAnswered = false;
+            chance = 3;
+            renderChance();
+
+            let optHtml = "";
+            item.opt.forEach(item => {
+                optHtml += `<button class="option" data-val="${item[0]}">${item}</button>`;
+            });
+            optionsBox.innerHTML = optHtml;
+
+            document.querySelectorAll(".option").forEach(btn => {
+                btn.onclick = function () {
+                    if(hasAnswered) return;
+                    hasAnswered = true;
+
+                    let selectedOpt = this.dataset.val;
+                    document.querySelectorAll(".option").forEach(b => b.classList.remove("active"));
+                    this.classList.add("active");
+
+                    const rightAns = questionList[current].ans;
+                    if (selectedOpt === rightAns) {
+                        if (current < questionList.length - 1) {
+                            current++;
+                            setTimeout(renderQuestion, 600);
+                        } else {
+                            document.querySelector(".wrap").style.display = "none";
+                            finishBg.style.display = "flex";
+                            bgMusic.play();
+                            startSlideShow();
+                        }
+                        return;
+                    }
+
+                    chance--;
+                    renderChance();
+                    if (chance > 0) {
+                        tipText.innerText = `回答错误，还剩${chance}次机会`;
+                        tipText.className = "tip error";
+                        hasAnswered = false;
+                    } else {
+                        tipText.innerText = `机会用完，正确答案：${rightAns}`;
+                        tipText.className = "tip error";
+                        setTimeout(() => {
+                            if (current < questionList.length - 1) {
+                                current++;
+                                renderQuestion();
+                            } else {
+                                document.querySelector(".wrap").style.display = "none";
+                                finishBg.style.display = "flex";
+                                bgMusic.play();
+                                startSlideShow();
+                            }
+                        }, 1200);
+                    }
+                };
+            });
+        }
+
+        renderQuestion();
+    </script>
+</body>
+</html>
